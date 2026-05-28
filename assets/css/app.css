@@ -672,6 +672,58 @@ td.empty {
   font-weight: 750;
 }
 
+.notice-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: var(--danger);
+}
+
+.login-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.login-switch a {
+  min-height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.login-switch a.active {
+  border-color: var(--brand);
+  background: #eef6ff;
+  color: var(--brand);
+}
+
+.demo-card {
+  display: grid;
+  gap: 5px;
+  margin: 0 0 18px;
+  padding: 12px;
+  border: 1px solid #c7d2fe;
+  border-radius: var(--radius);
+  background: #eef2ff;
+  color: #27346b;
+  font-size: 13px;
+}
+
+.demo-card strong {
+  color: #172554;
+}
+
+.logout-btn {
+  margin-top: auto;
+}
+
 .auth-body {
   min-height: 100vh;
   display: grid;

@@ -1,9 +1,15 @@
-const DB_KEY = "savagePortalDbV2";
+const DB_KEY = "savagePortalDbV3";
+const AUTH_KEY = "savagePortalAuthV2";
+
+const demoCredentials = {
+  customer: { email: "user@proxtools.test", password: "user12345" },
+  admin: { email: "admin@proxtools.test", password: "admin12345" },
+};
 
 const defaults = {
-  user: { name: "User", email: "user@savage.test", wallet: 0, deposited: 68000, spent: 0 },
+  user: { name: "Demo User", email: demoCredentials.customer.email, wallet: 0, deposited: 0, spent: 0 },
   customers: [
-    { id: "cust-1", name: "User", email: "user@savage.test", phone: "08012345678", status: "Active", createdAt: "May 26, 2026 15:18" },
+    { id: "cust-1", name: "Demo User", email: demoCredentials.customer.email, password: demoCredentials.customer.password, phone: "08012345678", status: "Active", createdAt: "May 28, 2026 15:00" },
   ],
   smsInventory: [
     { id: "sms-1", service: "WhatsApp", country: "Nigeria", number: "+234 812 000 1001", code: "482910", price: 350, status: "available" },
@@ -18,12 +24,12 @@ const defaults = {
     { id: "data-4", network: "9mobile", bundle: "5GB - 30 Days", price: 3100, stock: 9, status: "active" },
   ],
   orders: [],
-  deposits: [{ id: "dep-1", ref: "WAL-68000", amount: 68000, method: "Bank Transfer", status: "Completed", createdAt: "May 26, 2026 15:18" }],
-  logs: [{ id: "log-1", event: "Wallet Top-up", description: "Completed wallet top-up of ₦68,000.00", createdAt: "May 26, 2026 15:18" }],
+  deposits: [],
+  logs: [],
   tickets: [],
   invoices: [],
   flights: [],
-  updated: "May 26, 2026 15:18",
+  updated: "May 28, 2026 15:00",
 };
 
 function clone(value) {
@@ -52,6 +58,37 @@ function saveDb(next) {
 }
 
 let db = loadDb();
+
+const publicPages = new Set(["login", "register", "reset", "adminLogin"]);
+const adminPages = new Set(["admin"]);
+
+function getAuth() {
+  try {
+    return JSON.parse(sessionStorage.getItem(AUTH_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+function setAuth(role, email) {
+  sessionStorage.setItem(AUTH_KEY, JSON.stringify({ role, email, signedInAt: now() }));
+}
+
+function clearAuth() {
+  sessionStorage.removeItem(AUTH_KEY);
+}
+
+function isCustomerAuthed() {
+  return getAuth()?.role === "customer";
+}
+
+function isAdminAuthed() {
+  return getAuth()?.role === "admin";
+}
+
+function routeTo(url) {
+  window.location.href = url;
+}
 
 const nav = [
   { title: "Dashboard", links: [{ page: "dashboard", href: "index.html", label: "Dashboard", icon: "D" }] },
@@ -153,6 +190,7 @@ function shell(page, content, role = "Customer") {
         <button class="mobile-menu" type="button" data-menu>Menu</button>
         <div data-toast class="toast" hidden></div>
         ${content}
+        <button class="btn secondary logout-btn" type="button" data-logout>Logout</button>
         <footer class="footer">Copyright 2024 © Wapx PLUS +</footer>
       </main>
     </div>`;
@@ -178,6 +216,7 @@ function adminShell(content) {
         <button class="mobile-menu" type="button" data-menu>Admin Menu</button>
         <div data-toast class="toast" hidden></div>
         ${content}
+        <button class="btn secondary logout-btn" type="button" data-logout>Logout</button>
         <footer class="footer">Admin Console - Copyright 2024 © Wapx PLUS +</footer>
       </main>
     </div>`;
@@ -212,6 +251,14 @@ function pageHeader(title, subtitle, eyebrow = "Savage", extra = "") {
         <a class="btn secondary" href="balance.html">Top Up</a>
       </div>
     </section>`;
+}
+
+function loginLinks(active = "customer") {
+  return `
+    <div class="login-switch">
+      <a class="${active === "customer" ? "active" : ""}" href="login.html">Customer Login</a>
+      <a class="${active === "admin" ? "active" : ""}" href="admin-login.html">Admin Login</a>
+    </div>`;
 }
 
 function stat(label, value, note, icon) {
@@ -652,12 +699,12 @@ function auth(type) {
   const isRegister = type === "register";
   const isReset = type === "reset";
   const isAdmin = type === "admin-login";
-  const title = isRegister ? "Create account" : isReset ? "Reset password" : isAdmin ? "Admin login" : "Welcome back";
+  const title = isRegister ? "Create customer account" : isReset ? "Reset password" : isAdmin ? "Admin login" : "Customer login";
   const subtitle = isAdmin
-    ? "Enter the admin inventory desk. This demo opens directly after login."
+    ? "Enter the separated admin console for products, customers, orders, and audit logs."
     : isRegister
       ? "Set up your Savage customer account and start managing wallet services."
-      : isReset
+    : isReset
         ? "Enter your email and we will prepare a password reset link."
         : "Sign in to manage your wallet, services, orders, and support requests.";
 
@@ -674,23 +721,31 @@ function auth(type) {
       <main class="auth-panel-wrap">
         <section class="card auth-panel">
           <span class="brand-mark">S</span>
+          ${loginLinks(isAdmin ? "admin" : "customer")}
           <h2>${title}</h2>
           <p class="subtitle">${subtitle}</p>
-          <form class="form-grid">
-            ${isRegister ? '<div class="field full"><label>Full Name</label><input placeholder="User" /></div>' : ""}
-            <div class="field full"><label>Email Address</label><input type="email" value="${isAdmin ? "admin@savage.test" : ""}" placeholder="you@example.com" /></div>
-            ${!isReset ? '<div class="field full"><label>Password</label><input type="password" value="password" placeholder="Enter password" /></div>' : ""}
-            ${isRegister ? '<div class="field full"><label>Confirm Password</label><input type="password" placeholder="Confirm password" /></div>' : ""}
-            <div class="field full"><a class="btn" href="${isAdmin ? "admin.html" : "index.html"}">${isRegister ? "Create Account" : isReset ? "Send Reset Link" : "Login"}</a></div>
+          <div data-auth-message class="notice notice-error" hidden></div>
+          <div class="demo-card">
+            <strong>Demo ${isAdmin ? "admin" : "customer"}</strong>
+            <span>Email: ${isAdmin ? demoCredentials.admin.email : demoCredentials.customer.email}</span>
+            <span>Password: ${isAdmin ? demoCredentials.admin.password : demoCredentials.customer.password}</span>
+          </div>
+          <form class="form-grid" data-form="${isRegister ? "register" : isReset ? "reset-password" : isAdmin ? "admin-login" : "customer-login"}">
+            ${isRegister ? '<div class="field full"><label>Full Name</label><input name="name" placeholder="Your name" required /></div>' : ""}
+            <div class="field full"><label>Email Address</label><input name="email" type="email" value="${isAdmin ? demoCredentials.admin.email : isRegister || isReset ? "" : demoCredentials.customer.email}" placeholder="you@example.com" required /></div>
+            ${!isReset ? `<div class="field full"><label>Password</label><input name="password" type="password" value="${isAdmin ? demoCredentials.admin.password : isRegister ? "" : demoCredentials.customer.password}" placeholder="Enter password" required /></div>` : ""}
+            ${isRegister ? '<div class="field full"><label>Phone Number</label><input name="phone" placeholder="08012345678" /></div>' : ""}
+            ${isRegister ? '<div class="field full"><label>Confirm Password</label><input name="confirm" type="password" placeholder="Confirm password" required /></div>' : ""}
+            <div class="field full"><button class="btn" type="submit">${isRegister ? "Create Account" : isReset ? "Send Reset Link" : "Login"}</button></div>
           </form>
           <div class="auth-links">
             ${
               isRegister
                 ? '<span>Already have an account?</span><a href="login.html">Login</a>'
-                : isReset
+              : isReset
                   ? '<span>Remembered it?</span><a href="login.html">Back to login</a>'
                   : isAdmin
-                    ? '<a href="login.html">Customer login</a><a href="index.html">Dashboard</a>'
+                    ? '<a href="login.html">Customer login</a><a href="register.html">Create customer</a>'
                     : '<a href="forgot-password.html">Forgot password?</a><a href="register.html">Create account</a>'
             }
           </div>
@@ -870,6 +925,67 @@ function createFlight(form) {
   showToast("Flight request saved.");
 }
 
+function customerLogin(form) {
+  const email = form.elements.email.value.trim().toLowerCase();
+  const password = form.elements.password.value;
+  const isDemo = email === demoCredentials.customer.email && password === demoCredentials.customer.password;
+  const knownCustomer = (db.customers || []).find((customer) => customer.email.toLowerCase() === email);
+  if (!isDemo && !knownCustomer) return showAuthError("Customer account not found. Use the demo login or create an account.");
+  if (!isDemo && knownCustomer.password !== password) return showAuthError("Invalid customer password.");
+  setAuth("customer", email);
+  routeTo("index.html");
+}
+
+function adminLogin(form) {
+  const email = form.elements.email.value.trim().toLowerCase();
+  const password = form.elements.password.value;
+  if (email !== demoCredentials.admin.email || password !== demoCredentials.admin.password) {
+    return showAuthError("Invalid admin login. Use the demo admin credentials shown above.");
+  }
+  setAuth("admin", email);
+  routeTo("admin.html");
+}
+
+function registerCustomer(form) {
+  const name = form.elements.name.value.trim();
+  const email = form.elements.email.value.trim().toLowerCase();
+  const password = form.elements.password.value;
+  const confirm = form.elements.confirm.value;
+  if (password !== confirm) return showAuthError("Passwords do not match.");
+  if ((db.customers || []).some((customer) => customer.email.toLowerCase() === email)) {
+    return showAuthError("That customer already exists. Please login instead.");
+  }
+  const customer = {
+    id: uid("cust"),
+    name,
+    email,
+    password,
+    phone: form.elements.phone.value.trim() || "-",
+    status: "Active",
+    createdAt: now(),
+  };
+  db.customers.unshift(customer);
+  db.user.name = name;
+  db.user.email = email;
+  addLog("Customer Signup", `Created customer account for ${email}.`);
+  saveDb(db);
+  setAuth("customer", email);
+  routeTo("index.html");
+}
+
+function resetPassword(form) {
+  const email = form.elements.email.value.trim();
+  showAuthError(`Password reset link prepared for ${email}. Use the demo password to continue.`, "success");
+}
+
+function showAuthError(message, tone = "error") {
+  const box = document.querySelector("[data-auth-message]");
+  if (!box) return;
+  box.textContent = message;
+  box.className = `notice ${tone === "error" ? "notice-error" : ""}`;
+  box.hidden = false;
+}
+
 function bindPage() {
   const menu = document.querySelector("[data-menu]");
   if (menu) menu.addEventListener("click", () => document.body.classList.toggle("menu-open"));
@@ -885,6 +1001,16 @@ function bindPage() {
 function renderPage() {
   const root = document.querySelector("#app");
   const page = document.body.dataset.page || "dashboard";
+  if (!publicPages.has(page)) {
+    if (adminPages.has(page) && !isAdminAuthed()) {
+      routeTo("admin-login.html");
+      return;
+    }
+    if (!adminPages.has(page) && !isCustomerAuthed()) {
+      routeTo("login.html");
+      return;
+    }
+  }
   root.innerHTML = (renderers[page] || dashboard)();
   bindPage();
 }
@@ -902,6 +1028,10 @@ document.addEventListener("submit", (event) => {
   if (type === "ticket") createTicket(form);
   if (type === "invoice") createInvoice(form);
   if (type === "flight") createFlight(form);
+  if (type === "customer-login") customerLogin(form);
+  if (type === "admin-login") adminLogin(form);
+  if (type === "register") registerCustomer(form);
+  if (type === "reset-password") resetPassword(form);
 });
 
 document.addEventListener("click", (event) => {
@@ -931,6 +1061,12 @@ document.addEventListener("click", (event) => {
     saveDb(db);
     renderPage();
     showToast("Demo data reset.");
+  }
+
+  if (event.target.closest("[data-logout]")) {
+    const wasAdmin = isAdminAuthed();
+    clearAuth();
+    routeTo(wasAdmin ? "admin-login.html" : "login.html");
   }
 });
 
