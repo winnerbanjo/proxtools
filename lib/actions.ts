@@ -28,15 +28,20 @@ export async function loginAction(formData: FormData) {
   const role = formString(formData, "role") === "admin" ? "admin" : "customer";
   const email = formString(formData, "email").toLowerCase();
   const password = String(formData.get("password") || "");
-
-  const [user] = await db.select().from(users).where(and(eq(users.email, email), eq(users.role, role))).limit(1);
+  console.log(role, email, password);
+  let user: { id: string; email: string; passwordHash: string; role: "admin" | "customer" } | undefined;
+  if (role === "admin") {
+    [user] = await db.select().from(users).where(and(eq(users.email, email), eq(users.role, role))).limit(1);
+  } else {
+    [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  }
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     redirect(`/login?role=${role}&error=invalid`);
   }
 
   await createSession(user);
   await addLog(user.id, "Login", `${user.email} signed in.`);
-  redirect(role === "admin" ? "/admin" : "/");
+  redirect("/");
 }
 
 export async function registerAction(formData: FormData) {

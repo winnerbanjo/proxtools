@@ -12,7 +12,7 @@ import { getCustomerDashboard } from "@/lib/queries";
 import { money, shortDate, toNumber } from "@/lib/utils";
 
 export default async function DashboardPage() {
-  const user = await requireUser("customer");
+  const user = await requireUser();
   const data = await getCustomerDashboard(user.id);
   const smsOrders = data.orders.filter((order) => order.kind === "SMS");
   const dataOrders = data.orders.filter((order) => order.kind === "SME");

@@ -99,6 +99,13 @@ export async function currentUser() {
 export async function requireUser(role?: "customer" | "admin") {
   const user = await currentUser();
   if (!user) redirect(role === "admin" ? "/login?role=admin" : "/login");
-  if (role && user.role !== role) redirect(user.role === "admin" ? "/admin" : "/");
+  
+  // Irrespective of the required role, if the user is an admin they can access the route.
+  if (user.role === "admin") return user;
+  
+  if (role && user.role !== role) {
+    redirect("/");
+  }
+  
   return user;
 }

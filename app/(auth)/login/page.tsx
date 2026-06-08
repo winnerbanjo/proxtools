@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
+import { PasswordInput } from "@/components/password";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ role?: string; error?: string }> }) {
   const params = await searchParams;
   const isAdmin = params.role === "admin";
-
   return (
     <div className="auth-background grid min-h-screen lg:grid-cols-[0.95fr_1.05fr]">
       <section className="flex min-h-80 flex-col justify-between p-8 text-white">
@@ -46,7 +46,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             </label>
             <label className="grid gap-2 text-sm font-bold">
               Password
-              <Input name="password" type="password" defaultValue={isAdmin ? "admin12345" : "user12345"} required />
+
+
+              <PasswordInput name="password" defaultValue={isAdmin ? "admin12345" : "user12345"} />
+
             </label>
 
             <SubmitButton defaultText="Login" pendingText="Logging in..." />
