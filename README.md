@@ -1,4 +1,4 @@
-# ProxTools
+# ProxTools/
 
 Next.js conversion of the original static ProxTools/Savage dashboard.
 
