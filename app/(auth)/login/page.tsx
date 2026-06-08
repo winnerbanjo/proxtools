@@ -3,6 +3,7 @@ import { loginAction } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ role?: string; error?: string }> }) {
   const params = await searchParams;
@@ -47,7 +48,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               Password
               <Input name="password" type="password" defaultValue={isAdmin ? "admin12345" : "user12345"} required />
             </label>
-            <Button type="submit">Login</Button>
+
+            <SubmitButton defaultText="Login" pendingText="Logging in..." />
           </form>
           <div className="mt-4 flex justify-between gap-3 text-sm">
             <Link className="font-semibold text-primary no-underline" href="/forgot-password">Forgot password?</Link>

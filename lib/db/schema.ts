@@ -14,7 +14,7 @@ export const customerStatusEnum = pgEnum("customer_status", ["active", "suspende
 export const smsStatusEnum = pgEnum("sms_status", ["available", "sold"]);
 export const planStatusEnum = pgEnum("plan_status", ["active", "out_of_stock"]);
 export const orderKindEnum = pgEnum("order_kind", ["SMS", "SME"]);
-export const recordStatusEnum = pgEnum("record_status", ["Draft", "Open", "Completed", "Pending"]);
+export const recordStatusEnum = pgEnum("record_status", ["Draft", "Open", "Completed", "Pending", "Declined"]);
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -68,6 +68,16 @@ export const orders = pgTable("orders", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const assets = pgTable("assets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+  publicId: text("public_id").notNull(),
+  secureUrl: text("secure_url").notNull(),
+  resourceType: text("resource_type").notNull().default("image"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const deposits = pgTable("deposits", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -75,8 +85,23 @@ export const deposits = pgTable("deposits", {
   amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
   method: text("method").notNull(),
   narration: text("narration"),
-  status: recordStatusEnum("status").notNull().default("Completed"),
+  proofAssetId: uuid("proof_asset_id").references(() => assets.id, { onDelete: "set null" }),
+  proofUrl: text("proof_url"),
+  status: recordStatusEnum("status").notNull().default("Pending"),
+  reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const adminBankAccounts = pgTable("admin_bank_accounts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  bankName: text("bank_name").notNull(),
+  accountName: text("account_name").notNull(),
+  accountNumber: text("account_number").notNull(),
+  instructions: text("instructions"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const logs = pgTable("logs", {
@@ -119,17 +144,8 @@ export const flights = pgTable("flights", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const assets = pgTable("assets", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
-  publicId: text("public_id").notNull(),
-  secureUrl: text("secure_url").notNull(),
-  resourceType: text("resource_type").notNull().default("image"),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
 export type User = typeof users.$inferSelect;
 export type SmsInventory = typeof smsInventory.$inferSelect;
 export type DataPlan = typeof dataPlans.$inferSelect;
 export type Order = typeof orders.$inferSelect;
+export type AdminBankAccount = typeof adminBankAccounts.$inferSelect;

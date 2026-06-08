@@ -1,20 +1,28 @@
 import { CreditCard } from "lucide-react";
-import { DashboardShell, Field, PageHeader } from "@/components/dashboard-shell";
+import { BalanceFundingCard } from "@/app/balance/balance-funding-card";
+import { DashboardShell, PageHeader } from "@/components/dashboard-shell";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { DataTable } from "@/components/ui/table";
-import { topUpAction } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
 import { getCustomerDashboard } from "@/lib/queries";
 import { money, shortDate } from "@/lib/utils";
 
-export default async function BalancePage() {
+function statusClass(status: string) {
+  if (status === "Pending") return "border-amber-200 bg-amber-50 text-amber-700";
+  if (status === "Declined") return "border-red-200 bg-red-50 text-red-700";
+  return "";
+}
+
+export default async function BalancePage({ searchParams }: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
   const user = await requireUser("customer");
   const data = await getCustomerDashboard(user.id);
+  console.log(data);
+  const params = searchParams ? await searchParams : {};
+  const depositNotice = params.deposit === "pending";
+  const error = typeof params.error === "string" ? params.error : undefined;
+  const koraReference = typeof params.kora_reference === "string" ? params.kora_reference : undefined;
 
   return (
     <DashboardShell userName={user.name}>
@@ -25,17 +33,7 @@ export default async function BalancePage() {
         <StatCard label="Total Deposited" value={money(user.deposited)} note="Completed wallet top-ups" icon={<CreditCard className="size-5" />} />
       </section>
       <section className="mt-4 grid gap-4 xl:grid-cols-[1.45fr_0.55fr]">
-        <Card>
-          <CardHeader><CardTitle>Top Up Wallet</CardTitle></CardHeader>
-          <CardContent>
-            <form action={topUpAction} className="grid gap-4 md:grid-cols-2">
-              <Field label="Amount"><Input name="amount" type="number" placeholder="10000" min="100" required /></Field>
-              <Field label="Payment Method"><Select name="method"><option>Bank Transfer</option><option>Card Payment</option><option>USSD</option></Select></Field>
-              <Field label="Narration" full><Input name="narration" placeholder="Wallet top-up" /></Field>
-              <div className="md:col-span-2"><Button type="submit">Create Deposit</Button></div>
-            </form>
-          </CardContent>
-        </Card>
+        <BalanceFundingCard bankAccount={data.bankAccount} showPendingDialog={depositNotice} error={error} koraReference={koraReference} />
         <Card>
           <CardHeader><CardTitle>Wallet Health</CardTitle></CardHeader>
           <CardContent className="grid gap-3 text-sm">
@@ -47,7 +45,17 @@ export default async function BalancePage() {
       </section>
       <Card className="mt-4">
         <CardHeader><CardTitle>Deposit History</CardTitle></CardHeader>
-        <DataTable headers={["S/N", "Reference", "Amount", "Method", "Status", "Created At"]} rows={data.deposits.map((deposit, index) => [index + 1, deposit.ref, money(deposit.amount), deposit.method, <Badge key={deposit.id}>{deposit.status}</Badge>, shortDate(deposit.createdAt)])} />
+        <DataTable
+          headers={["S/N", "Reference", "Amount", "Method", "Status", "Created At"]}
+          rows={data.deposits.map((deposit, index) => [
+            index + 1,
+            deposit.ref,
+            money(deposit.amount),
+            deposit.method,
+            <Badge key={deposit.id} className={statusClass(deposit.status)}>{deposit.status}</Badge>,
+            shortDate(deposit.createdAt),
+          ])}
+        />
       </Card>
     </DashboardShell>
   );

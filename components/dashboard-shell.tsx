@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Contact, CreditCard, Database, Home, ListChecks, LogOut, MessageSquare, Plane, Receipt, Shield, Smartphone, UserCircle, Wifi } from "lucide-react";
+import { BarChart3, Building2, Contact, CreditCard, Database, Home, ListChecks, LogOut, MessageSquare, Plane, Receipt, Shield, Smartphone, UserCircle, Wifi } from "lucide-react";
 import { logoutAction } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +17,7 @@ const nav = [
 
 const adminNav = [
   { href: "/admin#overview", label: "Overview", icon: BarChart3 },
+  { href: "/admin#payments", label: "Payments", icon: Building2 },
   { href: "/admin#products", label: "Products", icon: Database },
   { href: "/admin#customers", label: "Customers", icon: UserCircle },
   { href: "/admin#orders", label: "Orders", icon: Receipt },
