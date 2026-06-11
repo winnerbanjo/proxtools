@@ -13,7 +13,7 @@ export default async function LogsPage() {
 
   return (
     <DashboardShell userName={user.name}>
-      <PageHeader eyebrow="Logs" title="Tools & Logs" subtitle="Audit wallet changes, service attempts, account activity, and system notes." />
+      <PageHeader eyebrow="Logs" title="Audit Trail" subtitle="Audit wallet changes, service attempts, account activity, and system notes." />
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard label="Login Events" value={data.logs.filter((log) => log.event === "Login").length} note="This account" icon={<ListChecks className="size-5" />} />
         <StatCard label="Wallet Events" value={data.deposits.length} note="Deposits recorded" icon={<ListChecks className="size-5" />} />

@@ -10,7 +10,7 @@ export function LogsTab({ data }: { data: any }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tools & Logs</CardTitle>
+        <CardTitle>Audit Trail</CardTitle>
       </CardHeader>
       <DataTable
         headers={["S/N", "Event", "Description", "IP Address", "Created At"]}

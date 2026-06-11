@@ -1,37 +1,17 @@
 import Link from "next/link";
-import { BarChart3, Building2, Contact, CreditCard, Database, Home, ListChecks, LogOut, Package, Plane, Receipt, Shield, Smartphone, UserCircle, Wifi } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { customerNav, adminNav } from "@/components/dashboard-nav-items";
+import { MobileDashboardNav } from "@/components/mobile-dashboard-nav";
 import { logoutAction } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 
-const nav = [
-  { href: "/", label: "Dashboard", icon: Home },
-  { href: "/sms-services", label: "SMS Services", icon: Smartphone },
-  { href: "/sme-services", label: "SME Services", icon: Wifi },
-  { href: "/products", label: "Products", icon: Package },
-  { href: "/balance", label: "Balance", icon: CreditCard },
-  { href: "/tools-logs", label: "Tools & Logs", icon: ListChecks },
-  { href: "/purchased", label: "Purchased", icon: Receipt },
-  { href: "/contact", label: "Contact", icon: Contact },
-  { href: "/billing", label: "Billing", icon: Database },
-  { href: "/travel", label: "Travel", icon: Plane },
-];
-
-const adminNav = [
-  { href: "/admin#overview", label: "Overview", icon: BarChart3 },
-  { href: "/admin#payments", label: "Payments", icon: Building2 },
-  { href: "/admin#products", label: "Products", icon: Database },
-  { href: "/admin#customers", label: "Customers", icon: UserCircle },
-  { href: "/admin#orders", label: "Orders", icon: Receipt },
-  { href: "/admin#logs", label: "Logs", icon: ListChecks },
-  { href: "/", label: "Customer Site", icon: Shield },
-];
-
 export function DashboardShell({ children, role = "Customer", userName = "User" }: { children: React.ReactNode; role?: "Customer" | "Admin"; userName?: string }) {
-  const items = role === "Admin" ? adminNav : nav;
+  const items = role === "Admin" ? adminNav : customerNav;
 
   return (
-    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)]">
-      <aside className="bg-slate-950 px-4 py-6 text-slate-100 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
+    <div className="min-h-screen lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
+      <MobileDashboardNav role={role} userName={userName} />
+      <aside className="hidden bg-slate-950 px-4 py-6 text-slate-100 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
         <Link href={role === "Admin" ? "/admin" : "/"} className="flex items-center gap-3 border-b border-white/10 pb-5 no-underline">
           <span className="grid size-11 place-items-center rounded-md bg-gradient-to-br from-teal-400 to-blue-600 font-black text-white">P</span>
           <span>
@@ -55,7 +35,7 @@ export function DashboardShell({ children, role = "Customer", userName = "User" 
           ))}
         </nav>
       </aside>
-      <main className="min-w-0 p-5 lg:p-7">
+      <main className="min-w-0 p-5 pt-20 lg:p-7">
         {children}
         <form action={logoutAction} className="mt-6">
           <Button variant="secondary" type="submit">
