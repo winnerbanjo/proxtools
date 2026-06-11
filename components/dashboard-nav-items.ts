@@ -1,4 +1,4 @@
-import { BarChart3, Building2, Contact, CreditCard, Database, Home, ListChecks, Package, Plane, Receipt, Shield, Smartphone, UserCircle, Wifi, type LucideIcon } from "lucide-react";
+import { BarChart3, Building2, CreditCard, Database, Home, ListChecks, Package, Receipt, Shield, UserCircle, type LucideIcon } from "lucide-react";
 
 export type DashboardNavItem = {
   href: string;
@@ -8,15 +8,10 @@ export type DashboardNavItem = {
 
 export const customerNav: DashboardNavItem[] = [
   { href: "/", label: "Dashboard", icon: Home },
-  { href: "/sms-services", label: "SMS Services", icon: Smartphone },
-  { href: "/sme-services", label: "SME Services", icon: Wifi },
   { href: "/products", label: "Logs", icon: Package },
   { href: "/balance", label: "Balance", icon: CreditCard },
   { href: "/tools-logs", label: "Audit Trail", icon: ListChecks },
   { href: "/purchased", label: "Purchased", icon: Receipt },
-  { href: "/contact", label: "Contact", icon: Contact },
-  { href: "/billing", label: "Billing", icon: Database },
-  { href: "/travel", label: "Travel", icon: Plane },
 ];
 
 export const adminNav: DashboardNavItem[] = [
