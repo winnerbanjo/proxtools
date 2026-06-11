@@ -1,11 +1,9 @@
 import { Package, ShoppingCart } from "lucide-react";
-import { DashboardShell, Field, PageHeader } from "@/components/dashboard-shell";
+import { DashboardShell, PageHeader } from "@/components/dashboard-shell";
+import { ProductPurchaseCard } from "@/components/product-purchase-card";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { buyProductAction } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
 import { getCustomerDashboard } from "@/lib/queries";
 import { getCachedUsdToNgnRate } from "@/lib/services/currency";
@@ -45,11 +43,14 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
 
   return (
     <DashboardShell userName={user.name}>
-      <PageHeader eyebrow="Marketplace" title="Products" subtitle={`ShopViaClone USD prices are converted to naira, then a ${shopMarkupPercent()}% wallet markup is applied automatically${rateSource ? ` via ${rateSource}` : ""}.`} />
+
+      <Badge className="mt-4 w-fit mb-10 border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700">
+        All accounts should be logged in with a US address to reduce the chance of account lock.
+      </Badge>
 
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard label="Available Balance" value={money(user.wallet)} note="Ready for purchases" icon={<ShoppingCart className="size-5" />} />
-        <StatCard label="Available Products" value={available.length} note="Live ShopViaClone stock" icon={<Package className="size-5" />} />
+        <StatCard label="Available Products" value={available.length} note="Live stock" icon={<Package className="size-5" />} />
         <StatCard label="Product Orders" value={productOrders.length} note="Completed product buys" icon={<Package className="size-5" />} />
       </section>
 
@@ -66,32 +67,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
               </CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {category.products.map((product) => {
-                const outOfStock = product.amount <= 0;
-                return (
-                  <article key={product.id} className="grid gap-3 rounded-md border bg-card p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h2 className="text-base font-bold leading-6">{product.name}</h2>
-                        <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{product.amount} in stock</p>
-                      </div>
-                      <strong className="whitespace-nowrap text-sm">{money(product.markedUpPrice)}</strong>
-                    </div>
-                    <p className="text-xs font-semibold text-muted-foreground">${product.priceUsd.toFixed(2)} base price</p>
-                    {product.description ? <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">{product.description}</p> : null}
-                    <form action={buyProductAction} className="mt-auto grid gap-3">
-                      <input type="hidden" name="productId" value={product.id} />
-                      <Field label="Quantity">
-                        <Input name="quantity" type="number" min="1" max={Math.max(1, product.amount)} defaultValue="1" disabled={outOfStock} />
-                      </Field>
-                      <Button type="submit" disabled={outOfStock}>
-                        <ShoppingCart className="size-4" />
-                        {outOfStock ? "Out of Stock" : "Buy Product"}
-                      </Button>
-                    </form>
-                  </article>
-                );
-              })}
+              {category.products.map((product) => <ProductPurchaseCard key={product.id} product={product} />)}
             </CardContent>
           </Card>
         ))}

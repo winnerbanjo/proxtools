@@ -26,6 +26,13 @@ export type ShopCategory = {
   products: ShopProduct[];
 };
 
+export class ShopViaCloneError extends Error {
+  constructor(message: string, public status = 502) {
+    super(message);
+    this.name = "ShopViaCloneError";
+  }
+}
+
 function apiKey() {
   const key = process.env.SHOPCLONEAPI;
   if (!key) throw new Error("SHOPCLONEAPI is not configured.");
@@ -121,10 +128,26 @@ export async function buyShopProduct(productId: string, quantity: number) {
     method: "POST",
     body: formData,
   });
-  const data = await response.json().catch(() => null);
+  console.log(response, "RESPONSE");
+  const text = await response.text();
+  let data: any = null;
+
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = null;
+  }
+
+  console.log(data, "DATA");
 
   if (!response.ok) {
-    throw new Error(data?.message || "External product purchase failed.");
+    const message = data?.message || data?.msg || data?.error || text || "ShopViaClone rejected the purchase request.";
+    throw new ShopViaCloneError(message, response.status || 502);
+  }
+
+  const externalStatus = String(data?.status ?? "").toLowerCase();
+  if (["0", "false", "fail", "failed", "error"].includes(externalStatus)) {
+    throw new ShopViaCloneError(data?.message || data?.msg || data?.error || "ShopViaClone could not complete this purchase.", 502);
   }
 
   return data;
