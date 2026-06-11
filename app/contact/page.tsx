@@ -16,7 +16,7 @@ export default async function ContactPage() {
   const data = await getCustomerDashboard(user.id);
 
   return (
-    <DashboardShell userName={user.name}>
+    <DashboardShell userName={user.name} accountRole={user.role}>
       <PageHeader eyebrow="Support" title="Contact Support" subtitle="Send a message to the support desk and keep track of your requests." />
       <section className="grid gap-4 xl:grid-cols-[1.45fr_0.55fr]">
         <Card>

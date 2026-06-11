@@ -42,7 +42,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
   const success = params.purchase === "success";
 
   return (
-    <DashboardShell userName={user.name}>
+    <DashboardShell userName={user.name} accountRole={user.role}>
 
       <Badge className="mt-4 w-fit mb-10 border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700">
         All accounts should be logged in with a US address to reduce the chance of account lock.

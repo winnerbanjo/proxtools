@@ -19,7 +19,7 @@ export default async function SmeServicesPage() {
   const dataOrders = data.orders.filter((order) => order.kind === "SME");
 
   return (
-    <DashboardShell userName={user.name}>
+    <DashboardShell userName={user.name} accountRole={user.role}>
       <PageHeader eyebrow="Services" title="SME Services" subtitle="Purchase data bundles from available admin-managed stock." />
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard label="Available Balance" value={money(user.wallet)} note="Ready for data purchases" icon={<Wifi className="size-5" />} />

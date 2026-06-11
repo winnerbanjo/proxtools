@@ -1,16 +1,20 @@
 import Link from "next/link";
-import { LogOut } from "lucide-react";
+import { LogOut, Shield, UserRound } from "lucide-react";
 import { customerNav, adminNav } from "@/components/dashboard-nav-items";
 import { MobileDashboardNav } from "@/components/mobile-dashboard-nav";
 import { logoutAction } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 
-export function DashboardShell({ children, role = "Customer", userName = "User" }: { children: React.ReactNode; role?: "Customer" | "Admin"; userName?: string }) {
+export function DashboardShell({ children, role = "Customer", accountRole, userName = "User" }: { children: React.ReactNode; role?: "Customer" | "Admin"; accountRole?: "customer" | "admin"; userName?: string }) {
   const items = role === "Admin" ? adminNav : customerNav;
+  const isAdminAccount = role === "Admin" || accountRole === "admin";
+  const switchHref = role === "Admin" ? "/" : "/admin";
+  const switchLabel = role === "Admin" ? "Go to User" : "Back to Admin";
+  const SwitchIcon = role === "Admin" ? UserRound : Shield;
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
-      <MobileDashboardNav role={role} userName={userName} />
+      <MobileDashboardNav role={role} accountRole={accountRole} userName={userName} />
       <aside className="hidden bg-slate-950 px-4 py-6 text-slate-100 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
         <Link href={role === "Admin" ? "/admin" : "/"} className="flex items-center gap-3 border-b border-white/10 pb-5 no-underline">
           <span className="grid size-11 place-items-center rounded-md bg-gradient-to-br from-teal-400 to-blue-600 font-black text-white">P</span>
@@ -26,6 +30,12 @@ export function DashboardShell({ children, role = "Customer", userName = "User" 
             <span className="text-sm text-slate-400">{role}</span>
           </span>
         </div>
+        {isAdminAccount ? (
+          <Link href={switchHref} className="mb-3 flex min-h-10 items-center gap-3 rounded-md border border-teal-400/30 bg-teal-400/10 px-3 py-2 text-sm font-semibold text-teal-100 no-underline hover:bg-teal-400/20">
+            <SwitchIcon className="size-4" />
+            {switchLabel}
+          </Link>
+        ) : null}
         <nav className="grid gap-2">
           {items.map((item) => (
             <Link key={item.href} href={item.href} className="flex min-h-10 items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-slate-300 no-underline hover:bg-white/10 hover:text-white">

@@ -14,7 +14,7 @@ export default async function TravelPage() {
   const data = await getCustomerDashboard(user.id);
 
   return (
-    <DashboardShell userName={user.name}>
+    <DashboardShell userName={user.name} accountRole={user.role}>
       <PageHeader eyebrow="Quick Action" title="Travel" subtitle="Create a flight request and keep the booking flow attached to your wallet." />
       <section className="grid gap-4 xl:grid-cols-[1.45fr_0.55fr]">
         <Card>

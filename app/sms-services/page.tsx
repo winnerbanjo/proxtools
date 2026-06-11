@@ -21,7 +21,7 @@ export default async function SmsServicesPage() {
   const smsOrders = data.orders.filter((order) => order.kind === "SMS");
 
   return (
-    <DashboardShell userName={user.name}>
+    <DashboardShell userName={user.name} accountRole={user.role}>
       <PageHeader eyebrow="Services" title="SMS Services" subtitle="Buy virtual numbers only when matching admin inventory is available." />
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard label="Available Balance" value={money(user.wallet)} note="Ready for SMS activations" icon={<Smartphone className="size-5" />} />

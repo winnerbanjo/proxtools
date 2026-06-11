@@ -2,13 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, Shield, UserRound, X } from "lucide-react";
 import { adminNav, customerNav } from "@/components/dashboard-nav-items";
 import { Button } from "@/components/ui/button";
 
-export function MobileDashboardNav({ role = "Customer", userName = "User" }: { role?: "Customer" | "Admin"; userName?: string }) {
+export function MobileDashboardNav({ role = "Customer", accountRole, userName = "User" }: { role?: "Customer" | "Admin"; accountRole?: "customer" | "admin"; userName?: string }) {
   const [open, setOpen] = useState(false);
   const items = role === "Admin" ? adminNav : customerNav;
+  const isAdminAccount = role === "Admin" || accountRole === "admin";
+  const switchHref = role === "Admin" ? "/" : "/admin";
+  const switchLabel = role === "Admin" ? "Go to User" : "Back to Admin";
+  const SwitchIcon = role === "Admin" ? UserRound : Shield;
 
   return (
     <>
@@ -42,6 +46,12 @@ export function MobileDashboardNav({ role = "Customer", userName = "User" }: { r
                 <span className="text-sm text-slate-400">{role}</span>
               </span>
             </div>
+            {isAdminAccount ? (
+              <Link href={switchHref} className="mb-3 flex min-h-10 items-center gap-3 rounded-md border border-teal-400/30 bg-teal-400/10 px-3 py-2 text-sm font-semibold text-teal-100 no-underline hover:bg-teal-400/20" onClick={() => setOpen(false)}>
+                <SwitchIcon className="size-4" />
+                {switchLabel}
+              </Link>
+            ) : null}
             <nav className="grid gap-2">
               {items.map((item) => (
                 <Link key={item.href} href={item.href} className="flex min-h-10 items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-slate-300 no-underline hover:bg-white/10 hover:text-white" onClick={() => setOpen(false)}>

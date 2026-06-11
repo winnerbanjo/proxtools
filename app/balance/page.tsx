@@ -25,7 +25,7 @@ export default async function BalancePage({ searchParams }: { searchParams?: Pro
   const koraReference = typeof params.kora_reference === "string" ? params.kora_reference : undefined;
 
   return (
-    <DashboardShell userName={user.name}>
+    <DashboardShell userName={user.name} accountRole={user.role}>
       <PageHeader eyebrow="Balance" title="Wallet Balance" subtitle="Top up your wallet, review deposits, and monitor your current spend." />
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard label="Available Balance" value={money(user.wallet)} note="Current wallet" icon={<CreditCard className="size-5" />} />

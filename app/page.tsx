@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   const usage = toNumber(user.deposited) ? Math.min(100, (toNumber(user.spent) / toNumber(user.deposited)) * 100) : 0;
 
   return (
-    <DashboardShell userName={user.name}>
+    <DashboardShell userName={user.name} accountRole={user.role}>
       <PageHeader
         eyebrow="Dashboard"
         title="Welcome Back"

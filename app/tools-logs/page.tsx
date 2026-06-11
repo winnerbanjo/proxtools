@@ -12,7 +12,7 @@ export default async function LogsPage() {
   const data = await getCustomerDashboard(user.id);
 
   return (
-    <DashboardShell userName={user.name}>
+    <DashboardShell userName={user.name} accountRole={user.role}>
       <PageHeader eyebrow="Logs" title="Audit Trail" subtitle="Audit wallet changes, service attempts, account activity, and system notes." />
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard label="Login Events" value={data.logs.filter((log) => log.event === "Login").length} note="This account" icon={<ListChecks className="size-5" />} />

@@ -15,7 +15,7 @@ export default async function BillingPage() {
   const outstanding = data.invoices.reduce((sum, item) => sum + Number(item.amount), 0);
 
   return (
-    <DashboardShell userName={user.name}>
+    <DashboardShell userName={user.name} accountRole={user.role}>
       <PageHeader eyebrow="Quick Action" title="Billing" subtitle="Create and review invoices tied to wallet funding and service purchases." />
       <section className="grid gap-4 xl:grid-cols-[1.45fr_0.55fr]">
         <Card>

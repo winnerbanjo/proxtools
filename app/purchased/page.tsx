@@ -16,7 +16,7 @@ export default async function PurchasedPage() {
   const productOrders = data.orders.filter((order) => order.kind === "PRODUCT");
 
   return (
-    <DashboardShell userName={user.name}>
+    <DashboardShell userName={user.name} accountRole={user.role}>
       <PageHeader eyebrow="Orders" title="Purchased Orders" subtitle="View everything bought from SMS rentals to SME services and invoices." />
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard label="Total Orders" value={data.orders.length} note="Completed orders" icon={<Receipt className="size-5" />} />
