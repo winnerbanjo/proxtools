@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Activity, BadgeDollarSign, CreditCard, Smartphone } from "lucide-react";
+import { Activity, BadgeDollarSign, CreditCard, Package, Smartphone } from "lucide-react";
 import { DashboardShell, PageHeader } from "@/components/dashboard-shell";
 import { ListRow } from "@/components/list-row";
 import { StatCard } from "@/components/stat-card";
@@ -16,6 +16,7 @@ export default async function DashboardPage() {
   const data = await getCustomerDashboard(user.id);
   const smsOrders = data.orders.filter((order) => order.kind === "SMS");
   const dataOrders = data.orders.filter((order) => order.kind === "SME");
+  const productOrders = data.orders.filter((order) => order.kind === "PRODUCT");
   const usage = toNumber(user.deposited) ? Math.min(100, (toNumber(user.spent) / toNumber(user.deposited)) * 100) : 0;
 
   return (
@@ -37,7 +38,7 @@ export default async function DashboardPage() {
         <StatCard label="Available Balance" value={money(user.wallet)} note={`Updated ${shortDate(user.updatedAt)}`} icon={<CreditCard className="size-5" />} />
         <StatCard label="Total Spent" value={money(user.spent)} note="All-time service usage" icon={<BadgeDollarSign className="size-5" />} />
         <StatCard label="Total Deposited" value={money(user.deposited)} note="Completed wallet top-ups" icon={<Activity className="size-5" />} />
-        <StatCard label="Activations" value={smsOrders.length} note="Successful SMS activations" icon={<Smartphone className="size-5" />} />
+        <StatCard label="Products" value={productOrders.length} note="Shop purchases" icon={<Package className="size-5" />} />
       </section>
       <section className="mt-4 grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">
         <Card>
@@ -49,6 +50,7 @@ export default async function DashboardPage() {
               ["Wallet", "Top Up", "/balance"],
               ["SMS", "Buy Number", "/sms-services"],
               ["SME", "Buy Data", "/sme-services"],
+              ["Products", "Buy Product", "/products"],
             ].map(([label, note, href]) => (
               <Link key={href} href={href} className="rounded-md border bg-secondary p-4 no-underline hover:bg-blue-50">
                 <strong className="block">{label}</strong>
@@ -64,6 +66,7 @@ export default async function DashboardPage() {
           <CardContent className="grid gap-3">
             <ListRow label="SMS Orders" value={smsOrders.length} />
             <ListRow label="SME Orders" value={dataOrders.length} />
+            <ListRow label="Product Orders" value={productOrders.length} />
             <ListRow label="Usage" value={`${usage.toFixed(1)}%`} />
             <div className="h-2 overflow-hidden rounded-full bg-secondary">
               <span className="block h-full bg-gradient-to-r from-primary to-emerald-500" style={{ width: `${usage}%` }} />
@@ -107,8 +110,8 @@ export default async function DashboardPage() {
           <CardTitle>Latest Orders</CardTitle>
         </CardHeader>
         <DataTable
-          headers={["S/N", "Type", "Country / Network", "Amount", "Status", "Created At"]}
-          rows={data.orders.slice(0, 5).map((order, index) => [index + 1, order.kind, order.country || order.network || "-", money(order.amount), <Badge key={order.id}>{order.status}</Badge>, shortDate(order.createdAt)])}
+          headers={["S/N", "Type", "Product / Network", "Amount", "Status", "Created At"]}
+          rows={data.orders.slice(0, 5).map((order, index) => [index + 1, order.kind, order.productName || order.country || order.network || "-", money(order.amount), <Badge key={order.id}>{order.status}</Badge>, shortDate(order.createdAt)])}
           empty="No orders yet."
         />
       </Card>

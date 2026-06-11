@@ -40,8 +40,8 @@ export function CustomersTab({ data }: { data: any }) {
           rows={data.orders.map((order: any, index: number) => [
             index + 1,
             order.kind,
-            order.service || order.network || "-",
-            order.country || order.phone || "-",
+            order.productName || order.service || order.network || "-",
+            order.externalRef || order.country || order.phone || "-",
             money(order.amount),
             <Badge key={order.id}>{order.status}</Badge>,
             shortDate(order.createdAt),

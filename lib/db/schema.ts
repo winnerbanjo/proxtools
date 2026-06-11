@@ -13,7 +13,7 @@ export const userRoleEnum = pgEnum("user_role", ["customer", "admin"]);
 export const customerStatusEnum = pgEnum("customer_status", ["active", "suspended"]);
 export const smsStatusEnum = pgEnum("sms_status", ["available", "sold"]);
 export const planStatusEnum = pgEnum("plan_status", ["active", "out_of_stock"]);
-export const orderKindEnum = pgEnum("order_kind", ["SMS", "SME"]);
+export const orderKindEnum = pgEnum("order_kind", ["SMS", "SME", "PRODUCT"]);
 export const recordStatusEnum = pgEnum("record_status", ["Draft", "Open", "Completed", "Pending", "Declined"]);
 
 export const users = pgTable("users", {
@@ -63,6 +63,11 @@ export const orders = pgTable("orders", {
   network: text("network"),
   bundle: text("bundle"),
   phone: text("phone"),
+  productId: text("product_id"),
+  productName: text("product_name"),
+  productQuantity: integer("product_quantity"),
+  productDetails: text("product_details"),
+  externalRef: text("external_ref"),
   amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
   status: recordStatusEnum("status").notNull().default("Completed"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

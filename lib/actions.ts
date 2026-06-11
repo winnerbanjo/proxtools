@@ -9,6 +9,7 @@ import { db } from "@/lib/db";
 import { adminBankAccounts, assets, dataPlans, deposits, flights, invoices, logs, orders, smsInventory, tickets, users } from "@/lib/db/schema";
 import { sendMail } from "@/lib/services/brevo";
 import { uploadAsset } from "@/lib/services/cloudinary";
+import { purchaseShopProductForUser } from "@/lib/services/product-purchases";
 
 const demoAdmin = {
   name: "Admin",
@@ -255,27 +256,27 @@ export async function approveDepositAction(formData: FormData) {
 
   const amount = Number(deposit.amount);
 
-  await db.transaction(async (tx) => {
-    await tx
+  await db.batch([
+    db
       .update(deposits)
       .set({ status: "Completed", reviewedBy: admin.id, reviewedAt: new Date() })
-      .where(eq(deposits.id, deposit.id));
+      .where(eq(deposits.id, deposit.id)),
 
-    await tx
+    db
       .update(users)
       .set({
         wallet: sql`${users.wallet} + ${amount}`,
         deposited: sql`${users.deposited} + ${amount}`,
         updatedAt: new Date(),
       })
-      .where(eq(users.id, deposit.userId));
+      .where(eq(users.id, deposit.userId)),
 
-    await tx.insert(logs).values({
+    db.insert(logs).values({
       userId: deposit.userId,
       event: "Wallet Top-up Approved",
       description: `Approved wallet top-up of ₦${amount}.`,
-    });
-  });
+    }),
+  ]);
 
   revalidatePath("/admin");
   revalidatePath("/balance");
@@ -347,6 +348,28 @@ export async function buyDataAction(formData: FormData) {
   await addLog(user.id, "SME Purchase", `Bought ${quantity} ${plan.network} ${plan.bundle} bundle(s).`);
   revalidatePath("/sme-services");
   redirect("/sme-services");
+}
+
+export async function buyProductAction(formData: FormData) {
+  const user = await requireUser("customer");
+  const productId = formString(formData, "productId");
+  const quantity = Math.max(1, Number(formData.get("quantity") || 1));
+
+  if (!productId || !Number.isFinite(quantity)) {
+    redirect("/products?error=invalid");
+  }
+
+  try {
+    await purchaseShopProductForUser(user, productId, quantity);
+  } catch (error) {
+    console.error("Product purchase failed:", error);
+    redirect("/products?error=purchase");
+  }
+
+  revalidatePath("/products");
+  revalidatePath("/purchased");
+  revalidatePath("/");
+  redirect("/products?purchase=success");
 }
 
 export async function createTicketAction(formData: FormData) {
