@@ -1,12 +1,15 @@
 import "server-only";
 
+import { getCachedUsdToNgnRate } from "@/lib/services/currency";
+
 const SHOP_PRODUCTS_URL = "https://shopviaclone22.com/api/products.php";
 const SHOP_BUY_URL = "https://shopviaclone22.com/api/buy_product";
 
 export type ShopProduct = {
   id: string;
   name: string;
-  price: number;
+  priceUsd: number;
+  priceNgn: number;
   markedUpPrice: number;
   amount: number;
   description: string;
@@ -34,8 +37,8 @@ export function shopMarkupPercent() {
   return Number.isFinite(percent) && percent >= 0 ? percent : 20;
 }
 
-function withMarkup(price: number) {
-  return Number((price * (1 + shopMarkupPercent() / 100)).toFixed(2));
+function withMarkup(priceNgn: number) {
+  return Number((priceNgn * (1 + shopMarkupPercent() / 100)).toFixed(2));
 }
 
 function text(value: unknown, fallback = "") {
@@ -47,16 +50,18 @@ function number(value: unknown, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function normalizeProduct(raw: Record<string, unknown>, category: Record<string, unknown>): ShopProduct {
-  const price = number(raw.price);
+function normalizeProduct(raw: Record<string, unknown>, category: Record<string, unknown>, usdToNgnRate: number): ShopProduct {
+  const priceUsd = number(raw.price);
+  const priceNgn = Number((priceUsd * usdToNgnRate).toFixed(2));
   const categoryId = text(category.id ?? category.category_id ?? category.name, "uncategorized");
   const categoryName = text(category.name ?? category.category ?? category.title, "Products");
 
   return {
     id: text(raw.id ?? raw.product_id),
     name: text(raw.name ?? raw.product_name ?? raw.title, "Untitled product"),
-    price,
-    markedUpPrice: withMarkup(price),
+    priceUsd,
+    priceNgn,
+    markedUpPrice: withMarkup(priceNgn),
     amount: number(raw.amount ?? raw.stock ?? raw.quantity),
     description: text(raw.description ?? raw.details),
     categoryId,
@@ -67,6 +72,7 @@ function normalizeProduct(raw: Record<string, unknown>, category: Record<string,
 }
 
 export async function getShopProducts(): Promise<ShopCategory[]> {
+  const { rate } = await getCachedUsdToNgnRate();
   const url = `${SHOP_PRODUCTS_URL}?api_key=${encodeURIComponent(apiKey())}`;
   const response = await fetch(url, { next: { revalidate: 60 } });
   const data = await response.json().catch(() => null);
@@ -91,7 +97,7 @@ export async function getShopProducts(): Promise<ShopCategory[]> {
       name: fallbackName,
       icon: text(category.icon ?? category.image, ""),
       products: products
-        .map((product) => normalizeProduct(product as Record<string, unknown>, category))
+        .map((product) => normalizeProduct(product as Record<string, unknown>, category, rate))
         .filter((product) => product.id),
     };
   });

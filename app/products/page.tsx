@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { buyProductAction } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
 import { getCustomerDashboard } from "@/lib/queries";
+import { getCachedUsdToNgnRate } from "@/lib/services/currency";
 import { getShopProducts, shopMarkupPercent, type ShopCategory } from "@/lib/services/shopviaclone";
 import { money } from "@/lib/utils";
 
@@ -26,9 +27,12 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
   const productOrders = data.orders.filter((order) => order.kind === "PRODUCT");
   let categories: ShopCategory[] = [];
   let loadError = "";
+  let rateSource = "";
 
   try {
-    categories = await getShopProducts();
+    const [shopCategories, rate] = await Promise.all([getShopProducts(), getCachedUsdToNgnRate()]);
+    categories = shopCategories;
+    rateSource = rate.source;
   } catch (error) {
     console.error("Unable to fetch ShopViaClone products:", error);
     loadError = "Products are temporarily unavailable.";
@@ -41,7 +45,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
 
   return (
     <DashboardShell userName={user.name}>
-      <PageHeader eyebrow="Marketplace" title="Products" subtitle={`Buy ShopViaClone products with a ${shopMarkupPercent()}% wallet markup applied automatically.`} />
+      <PageHeader eyebrow="Marketplace" title="Products" subtitle={`ShopViaClone USD prices are converted to naira, then a ${shopMarkupPercent()}% wallet markup is applied automatically${rateSource ? ` via ${rateSource}` : ""}.`} />
 
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard label="Available Balance" value={money(user.wallet)} note="Ready for purchases" icon={<ShoppingCart className="size-5" />} />
@@ -73,6 +77,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
                       </div>
                       <strong className="whitespace-nowrap text-sm">{money(product.markedUpPrice)}</strong>
                     </div>
+                    <p className="text-xs font-semibold text-muted-foreground">${product.priceUsd.toFixed(2)} base price</p>
                     {product.description ? <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">{product.description}</p> : null}
                     <form action={buyProductAction} className="mt-auto grid gap-3">
                       <input type="hidden" name="productId" value={product.id} />
