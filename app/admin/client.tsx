@@ -43,14 +43,14 @@ export function AdminDashboardClient({
         subtitle="Manage sellable inventory, inspect customers, review purchases, and audit wallet/service events."
       />
 
-      <div className="mb-6 flex space-x-1 border-b overflow-x-auto pb-px">
+      <div className="mb-6 flex gap-2 overflow-x-auto rounded-md border border-slate-950/10 bg-white/55 p-2 shadow-sm">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.id
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+            className={`whitespace-nowrap rounded-md px-4 py-2 text-sm font-black transition ${activeTab === tab.id
+                ? "bg-slate-950 text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)]"
+                : "text-muted-foreground hover:bg-slate-950/[0.07] hover:text-foreground"
               }`}
           >
             {tab.label}

@@ -4,7 +4,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { createPasswordHash, createSession, clearSession, requireUser, verifyPassword } from "@/lib/auth";
+import { createPasswordHash, createSession, clearSession, currentUser, requireUser, verifyPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { adminBankAccounts, assets, dataPlans, deposits, flights, invoices, logs, orders, smsInventory, tickets, users } from "@/lib/db/schema";
 import { sendMail } from "@/lib/services/brevo";
@@ -29,20 +29,15 @@ export async function loginAction(formData: FormData) {
   const role = formString(formData, "role") === "admin" ? "admin" : "customer";
   const email = formString(formData, "email").toLowerCase();
   const password = String(formData.get("password") || "");
-  console.log(role, email, password);
   let user: { id: string; email: string; passwordHash: string; role: "admin" | "customer" } | undefined;
-  if (role === "admin") {
-    [user] = await db.select().from(users).where(and(eq(users.email, email), eq(users.role, role))).limit(1);
-  } else {
-    [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  }
+  [user] = await db.select().from(users).where(and(eq(users.email, email), eq(users.role, role))).limit(1);
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
-    redirect(`/login?role=${role}&error=invalid`);
+    redirect(role === "admin" ? "/admin-login?error=invalid" : "/login?error=invalid");
   }
 
   await createSession(user);
   await addLog(user.id, "Login", `${user.email} signed in.`);
-  redirect("/");
+  redirect(user.role === "admin" ? "/admin" : "/");
 }
 
 export async function registerAction(formData: FormData) {
@@ -152,8 +147,9 @@ export async function forgotPasswordAction(formData: FormData) {
 }
 
 export async function logoutAction() {
+  const user = await currentUser();
   await clearSession();
-  redirect("/login");
+  redirect(user?.role === "admin" ? "/admin-login" : "/login");
 }
 
 export async function topUpAction(formData: FormData) {

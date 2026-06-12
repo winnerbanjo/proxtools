@@ -52,9 +52,10 @@ export default async function DashboardPage() {
               ["SME", "Buy Data", "/sme-services"],
               ["Products", "Buy Product", "/products"],
             ].map(([label, note, href]) => (
-              <Link key={href} href={href} className="rounded-md border bg-secondary p-4 no-underline hover:bg-blue-50">
-                <strong className="block">{label}</strong>
-                <span className="text-sm text-muted-foreground">{note}</span>
+              <Link key={href} href={href} className="group rounded-md border border-slate-950/10 bg-white/62 p-4 no-underline transition hover:-translate-y-1 hover:bg-white hover:shadow-[0_16px_38px_rgba(15,23,42,0.1)]">
+                <strong className="font-display block text-xl font-black tracking-normal text-slate-950">{label}</strong>
+                <span className="mt-1 block text-sm font-semibold text-muted-foreground">{note}</span>
+                <span className="mt-4 block h-1 w-10 bg-[#f05238] transition group-hover:w-16" />
               </Link>
             ))}
           </CardContent>

@@ -56,8 +56,6 @@ export function ProductPurchaseCard({ product }: { product: Product }) {
         body: JSON.stringify({ productId: product.id, quantity: safeQuantity }),
       });
       const data = await response.json().catch(() => null);
-      console.log(data, "DATA");
-
       if (!response.ok || !data?.success) {
         throw new Error(data?.message || "We could not complete this purchase. Please try again.");
       }
@@ -77,15 +75,15 @@ export function ProductPurchaseCard({ product }: { product: Product }) {
   }
 
   return (
-    <article className="grid gap-3 rounded-md border bg-card p-4">
+    <article className="grid gap-4 rounded-md border border-slate-950/10 bg-white/70 p-4 shadow-sm transition hover:-translate-y-1 hover:bg-white/90 hover:shadow-[0_18px_45px_rgba(15,23,42,0.1)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-base font-bold leading-6">{product.name}</h2>
-          <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{product.amount} in stock</p>
+          <h2 className="font-display text-xl font-black leading-6 tracking-normal text-slate-950">{product.name}</h2>
+          <p className="mt-2 text-xs font-black uppercase tracking-[0.16em] text-muted-foreground">{product.amount} in stock</p>
         </div>
-        <strong className="whitespace-nowrap text-sm">{money(product.markedUpPrice)}</strong>
+        <strong className="whitespace-nowrap rounded-md bg-slate-950 px-2 py-1 text-sm font-black text-white">{money(product.markedUpPrice)}</strong>
       </div>
-      <p className="text-xs font-semibold text-muted-foreground">${product.priceUsd.toFixed(2)} base price</p>
+      <p className="text-xs font-black uppercase tracking-[0.12em] text-[#0f766e]">${product.priceUsd.toFixed(2)} base price</p>
       {product.description ? <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">{product.description}</p> : null}
       <div className="mt-auto grid gap-3">
         <Field label="Quantity">

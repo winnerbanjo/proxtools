@@ -29,11 +29,11 @@ export function Modal({ open, onOpenChange, title, children }: ModalProps) {
   return (
     <dialog
       ref={dialogRef}
-      className="backdrop:bg-black/50 backdrop:backdrop-blur-sm rounded-lg shadow-xl w-full max-w-lg p-0 open:animate-in open:fade-in-0 open:zoom-in-95"
+      className="w-full max-w-lg rounded-md border border-slate-950/15 bg-[#f4efe5] p-0 shadow-[0_30px_90px_rgba(0,0,0,0.28)] backdrop:bg-slate-950/60 backdrop:backdrop-blur-sm open:animate-in open:fade-in-0 open:zoom-in-95"
       onClose={handleClose}
     >
-      <div className="flex items-center justify-between border-b p-4">
-        <h2 className="text-lg font-semibold">{title}</h2>
+      <div className="flex items-center justify-between border-b border-slate-950/10 p-4">
+        <h2 className="font-display text-xl font-black tracking-normal">{title}</h2>
         <Button variant="ghost" size="icon" onClick={handleClose}>
           <X className="size-4" />
         </Button>

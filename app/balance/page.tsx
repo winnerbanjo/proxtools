@@ -18,7 +18,6 @@ function statusClass(status: string) {
 export default async function BalancePage({ searchParams }: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
   const user = await requireUser("customer");
   const data = await getCustomerDashboard(user.id);
-  console.log(data);
   const params = searchParams ? await searchParams : {};
   const depositNotice = params.deposit === "pending";
   const error = typeof params.error === "string" ? params.error : undefined;

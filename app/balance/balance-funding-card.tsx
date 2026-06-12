@@ -29,7 +29,7 @@ const errorMessages: Record<string, string> = {
 function FundingField({ label, children, full = false }: { label: string; children: ReactNode; full?: boolean }) {
   return (
     <label className={full ? "grid gap-2 md:col-span-2" : "grid gap-2"}>
-      <span className="text-sm font-bold">{label}</span>
+      <span className="text-sm font-black text-slate-800">{label}</span>
       {children}
     </label>
   );
@@ -58,10 +58,10 @@ function CopyButton({ value, label }: { value: string; label: string }) {
 
 function BankRow({ label, value, canCopy = false }: { label: string; value: string; canCopy?: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-md border bg-secondary/45 px-3 py-2">
+    <div className="flex items-center justify-between gap-3 rounded-md border border-slate-950/10 bg-white/62 px-3 py-3">
       <span className="min-w-0">
-        <span className="block text-xs font-bold uppercase tracking-wide text-muted-foreground">{label}</span>
-        <strong className="mt-1 block break-words text-sm">{value}</strong>
+        <span className="block text-xs font-black uppercase tracking-[0.16em] text-muted-foreground">{label}</span>
+        <strong className="mt-1 block break-words text-sm font-black">{value}</strong>
       </span>
       {canCopy ? <CopyButton value={value} label={label} /> : null}
     </div>
@@ -71,17 +71,17 @@ function BankRow({ label, value, canCopy = false }: { label: string; value: stri
 function FundingDialog({ title, body, onClose }: { title: string; body: string; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 px-4">
-      <div className="w-full max-w-md rounded-lg border bg-card p-5 shadow-2xl">
+      <div className="w-full max-w-md rounded-md border border-slate-950/10 bg-[#f4efe5] p-5 shadow-2xl">
         <div className="flex items-start justify-between gap-4">
-          <span className="grid size-11 place-items-center rounded-full bg-emerald-50 text-emerald-700">
+          <span className="grid size-11 place-items-center rounded-md bg-slate-950 text-[#f05238]">
             <CheckCircle2 className="size-6" />
           </span>
           <Button type="button" variant="ghost" size="icon" title="Close dialog" onClick={onClose}>
             <X className="size-4" />
           </Button>
         </div>
-        <h2 className="mt-4 text-xl font-black tracking-normal">{title}</h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p>
+        <h2 className="font-display mt-4 text-2xl font-black tracking-normal">{title}</h2>
+        <p className="mt-2 text-sm font-semibold leading-6 text-muted-foreground">{body}</p>
         <Button type="button" className="mt-5 w-full" onClick={onClose}>
           Done
         </Button>
@@ -104,7 +104,6 @@ export function BalanceFundingCard({ bankAccount, showPendingDialog = false, err
   const errorMessage = error ? errorMessages[error] : null;
   const isReady = Boolean(bankAccount);
   const appHasBankaccounts = bankAccount !== null && bankAccount !== undefined;
-  console.error(bankAccount);
   const instructions = useMemo(() => {
     return bankAccount?.instructions?.trim() || "Use your wallet top-up reference or account name as the transfer narration.";
   }, [bankAccount?.instructions]);
@@ -219,7 +218,7 @@ export function BalanceFundingCard({ bankAccount, showPendingDialog = false, err
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle>Top Up Wallet</CardTitle>
-            <div className="inline-flex rounded-md border bg-secondary p-1">
+            <div className="inline-flex rounded-md border border-slate-950/10 bg-white/62 p-1">
               <Button
                 type="button"
                 size="sm"
@@ -258,11 +257,11 @@ export function BalanceFundingCard({ bankAccount, showPendingDialog = false, err
                   <BankRow label="Bank" value={bankAccount.bankName} />
                   <BankRow label="Account Name" value={bankAccount.accountName} canCopy />
                   <BankRow label="Account Number" value={bankAccount.accountNumber} canCopy />
-                  <p className="rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-sm leading-6 text-blue-800">{instructions}</p>
+                  <p className="rounded-md border border-teal-700/15 bg-teal-50 px-3 py-2 text-sm font-semibold leading-6 text-teal-900">{instructions}</p>
                 </div>
               ) : (
-                <div className="grid gap-3 rounded-md border bg-secondary/40 p-3">
-                  <p className="rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-sm leading-6 text-blue-800">No accounts configured yet, contact support or admin</p>
+                <div className="grid gap-3 rounded-md border border-slate-950/10 bg-white/58 p-3">
+                  <p className="rounded-md border border-teal-700/15 bg-teal-50 px-3 py-2 text-sm font-semibold leading-6 text-teal-900">No accounts configured yet, contact support or admin</p>
                 </div>
               )}
 
@@ -274,7 +273,7 @@ export function BalanceFundingCard({ bankAccount, showPendingDialog = false, err
                   <Input name="narration" placeholder="Wallet top-up" disabled={!isReady} value={narration} onChange={(event) => setNarration(event.currentTarget.value)} />
                 </FundingField>
                 <FundingField label="Transfer Proof" full>
-                  <label className="flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-secondary/35 px-4 py-5 text-center text-sm font-semibold text-muted-foreground">
+                  <label className="flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed border-slate-950/25 bg-white/62 px-4 py-5 text-center text-sm font-black text-muted-foreground transition hover:border-primary hover:bg-white">
                     {fileName ? <CheckCircle2 className="size-6 text-emerald-600" /> : <UploadCloud className="size-6" />}
                     <span>{fileName || "Upload receipt image or PDF"}</span>
                     <Input
